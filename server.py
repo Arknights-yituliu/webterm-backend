@@ -10,8 +10,23 @@ sock = Sock(app)
 CORS(app)
 
 
+p_count = 0
+P_LIMIT = 4
+
+
+@app.route("/snowsant/p")
+def process_count():
+    global p_count
+    return {"p_count": p_count, "P_LIMIT": P_LIMIT}
+
+
 @sock.route("/snowsant")
 def snowsant(ws):
+    global p_count
+    global P_LIMIT
+    if p_count >= P_LIMIT:
+        return
+
     # 启动进程，记下连接
     p = subprocess.Popen(
         [sys.executable, "run.py"],
@@ -20,6 +35,8 @@ def snowsant(ws):
         text=True,
         bufsize=0,
     )
+
+    p_count += 1
 
     # 输入和输出处理
     while True:
@@ -34,3 +51,5 @@ def snowsant(ws):
         except Exception as e:
             p.terminate()
             break
+
+    p_count -= 1
