@@ -11,7 +11,7 @@ CORS(app)
 
 
 p_count = 0
-P_LIMIT = 4
+P_LIMIT = 15
 
 
 @app.route("/snowsant/p")
