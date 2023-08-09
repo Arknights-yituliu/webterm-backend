@@ -4,6 +4,7 @@ from flask_cors import CORS
 import subprocess
 import sys
 import os
+from threading import Lock
 
 app = Flask(__name__)
 sock = Sock(app)
@@ -12,6 +13,8 @@ CORS(app)
 
 p_count = 0
 P_LIMIT = 15
+
+lock = Lock()
 
 
 @app.route("/snowsant/p")
@@ -22,6 +25,7 @@ def process_count():
 
 @sock.route("/snowsant")
 def snowsant(ws):
+    global lock
     global p_count
     global P_LIMIT
     if p_count >= P_LIMIT:
@@ -36,7 +40,8 @@ def snowsant(ws):
         bufsize=0,
     )
 
-    p_count += 1
+    with lock:
+        p_count += 1
 
     # 输入和输出处理
     while True:
@@ -52,4 +57,5 @@ def snowsant(ws):
             p.terminate()
             break
 
-    p_count -= 1
+    with lock:
+        p_count -= 1
